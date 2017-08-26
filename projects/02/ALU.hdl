@@ -43,4 +43,30 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+    Mux16(a=x,b[0..15]=false,sel=zx,out=outzx); // zero the x
+    Mux16(a=y,b[0..15]=false,sel=zy,out=outzy); //zero the y
+
+    Not16(in=outzx,out=outnotzx); // Not the x
+    Not16(in=outzy,out=outnotzy); // Not the y
+    
+    Mux16(a=outzx,b=outnotzx,sel=nx,out=outnx); // chose x or notx
+    Mux16(a=outzy,b=outnotzy,sel=ny,out=outny); // chose y or noty
+   
+    Add16(a=outnx,b=outny,out=outadd); //x+y
+    And16(a=outnx,b=outny,out=outand); //x&y
+    Mux16(a=outand,b=outadd,sel=f,out=outf); //chose x+y or x&y
+
+    Not16(in=outf,out=outno); //not the output or not
+    Mux16(a=outf,b=outno,sel=no,out=outshow); //chose which
+
+    //Or16Way implementation
+    And16(a[0..15]=true,b=outshow,out[0..7]=notzr7,out[8..15]=notzr15);
+    Or8Way(in=notzr7,out=outnotzr7);
+    Or8Way(in=notzr15,out=outnotzr15);
+    Or(a=outnotzr7,b=outnotzr15,out=notzr);
+    //Or16Way(in=outshow,out=notzr);
+    Not(in=notzr,out=zr); //for zr
+    
+    And16(a[0..15]=true,b=outshow,out[15]=ng,out[0..14]=drop);//ng
+    Or16(a=outshow,b[0..15]=false,out=out);    
 }
